@@ -1,16 +1,21 @@
+/* http://tharikasblogs.blogspot.com/p/how-to-write-your-own-malloc-and-free.html */
 
-malloc.c
 
 #include<stdio.h>
-#include<stddef.h>
+#include<stddef.h>  //contains the defination of size_t datatype
 #include "mymalloc.h"
 
+/*we initialize a pointer of type "block", named freeList pointing to the starting address of the chunk of memory we created before. 
+This freeList pointer will point to the start of the linked list of metadata blocks.
+The starting address of the array (memory) should be casted to type void so that we are able to allocate blocks of memory which are 
+of different datatypes.(int, char, float etc.) */
 
 void initialize(){
- freeList->size=20000-sizeof(struct block);
- freeList->free=1;
- freeList->next=NULL;
+ freeList->size=20000-sizeof(struct block); /*The size of the block that it refers to is (20000 bytes- the_size_of_one_metadata_block)*/
+ freeList->free=1;                          /*To indicate that the block is not yet allocated, we set the free flag to 1.*/
+ freeList->next=NULL;                       /*And the first metadata block has no next metadata block yet. So we set next to NULL.*/
 }
+
 
 void split(struct block *fitting_slot,size_t size){
  struct block *new=(void*)((void*)fitting_slot+size+sizeof(struct block));
@@ -80,21 +85,22 @@ void MyFree(void* ptr){
 
                                                                                                                                             
 
-malloc.h
+mymalloc.h
 
 
 #include<stdio.h>
 #include<stddef.h>
 
-char memory[20000];
+char memory[20000];   //Our memory pool from where we are allocating the memory. Array declaration will give continous memory
 
+//Metadata block structure. This is required to keep track which block of memory is freed and which one is available or already allocated.
 struct block{
- size_t size;
- int free;
- struct block *next; 
+ size_t size; /*Carries the size of the block described by it*/
+ int free;     /*flag is used to know whether the block described by the metadata structure is free or not -- > if free, it is set to 1. Otherwise 0.*/
+ struct block *next; /*Points to the next metadata block*/ 
 };
 
-struct block *freeList=(void*)memory;
+struct block *freeList=(void*)memory; /*Pointing to the main block of memory which is initially free (no storage allocation yet)*/
 
 void initialize();
 void split(struct block *fitting_slot,size_t size);
